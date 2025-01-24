@@ -10,46 +10,49 @@ source:
   sha256: 4171fadf4a2db1b1ed84536fb2f16ea14bde894d690ff321a85e27df26286b37
 
 build:
-  script:
-    # PyPy has weird sysconfigdata name
-    - rm -f $PREFIX/lib/pypy$PY_VER/_sysconfigdata.py  # [build_platform != target_platform and target_platform == "linux-ppc64le"]
-    - {{ PYTHON }} -m pip install . -vv
-    - cargo-bundle-licenses --format yaml --output THIRDPARTY.yml
   number: 0
+  script:
+    - {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+    - cargo-bundle-licenses --format yaml --output THIRDPARTY.yml
+  skip: True  # [py<38]
 
 requirements:
   build:
-    - python                                 # [build_platform != target_platform]
-    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
-    - maturin >=1,<2                         # [build_platform != target_platform]
-    - {{ compiler("c") }}
-    - {{ stdlib("c") }}
     - {{ compiler("rust") }}
+    - {{ compiler("c") }}
     - cargo-bundle-licenses
   host:
     - python
     - pip
+    - poetry-core
     - maturin >=1,<2
   run:
     - python
-    - packaging >=24.1
+    - packaging >=24.1,<25
 
 test:
+  source_files:
+    - tests
   imports:
     - python_calamine
-  requires:
-    - pip
   commands:
     - pip check
+    - pytest -v tests
+  requires:
+    - pip
+    - pytest
 
 about:
   home: https://github.com/dimastbk/python-calamine
-  dev_url: https://github.com/dimastbk/python-calamine
   summary: Python binding for Rust's library for reading excel and odf file - calamine.
   license: MIT
+  license_family: MIT
   license_file:
     - LICENSE
     - THIRDPARTY.yml
+  doc_url: https://github.com/dimastbk/python-calamine/blob/master/README.md
+  dev_url: https://github.com/dimastbk/python-calamine
+  description: Python binding for beautiful Rust's library for reading excel and odf file - calamine.
 
 extra:
   recipe-maintainers:
