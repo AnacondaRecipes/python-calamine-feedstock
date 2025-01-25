@@ -26,7 +26,6 @@ requirements:
   host:
     - python
     - pip
-    - poetry-core
     - maturin >=1,<2
   run:
     - python
